@@ -1,0 +1,13 @@
+Go-Back-N ARQ è un'istanza specifica del protocollo ARQ, nel quale il processo mittente continua a mandare un numero di frame specificato da una "grandezza della finestra" (window size) anche senza ricevere alcun frame di ACK dal ricevitore.
+
+Mittente e destinatario necessitano di accordarsi preventivamente sulla semantica degli acknowledgement, poiché tre vie sono possibili:
+
+La prima, che utilizza ACK individuali (o selettivi), assegna all'ACK(n) il significato "ho ricevuto il frame n" e prevede che il destinatario mantenga traccia del numero di sequenza del successivo frame che si aspetta di ricevere, e spedisce tale numero, ogni volta che manda un segnale ACK. Se un frame inviato dal mittente non arriva al destinatario, il mittente fermerà l'invio dei frame. Una volta che il mittente ha spedito tutti i frame della sua finestra, si renderà conto che tutti i frame dalla prima perdita in poi sono stati evasi, e tornerà quindi indietro all'ultimo numero di sequenza ACK ricevuto dal processo destinatario e ricomincerà a creare la finestra, a partire proprio da quel frame.
+
+La seconda, che utilizza ACK cumulativi e assegna all'ACK(n) il significato di "ho ricevuto tutti i frame fino ad n escluso", funziona similmente alla prima, ma su gruppi di frame: questo permette di risparmiare sugli ACK inviati, ma in caso di errore va ritrasmessa l'intera finestra.
+
+Come ultima possibilità vi è quella dell'ACK negativo, dove il destinatario notifica la necessità di ritrasmissione di un singolo frame.
+
+La grandezza della finestra deve essere un numero comparabile a quello della sequenza per permettere la verifica di avvenuta trasmissione anche nel caso in cui ogni frame venga perso. Se per l'ordinamento delle trame vengono utilizzati numeri di sequenza a m bit, la dimensione massima della finestra sarà 2m.
+
+Il metodo Go-Back N è uno dei modi più efficienti di effettuare una connessione, perché contrariamente al dovere aspettare che ogni frame invii il proprio frame ACK, la connessione viene usata più a lungo, mandando altri frame mentre si aspetta. In altre parole, durante il tempo che altrimenti sarebbe stato di attesa, vengono inviati frame aggiuntivi a prescindere dal risultato dell'invio precedente. Infatti, l'arrivo di un ACK relativo al frame che occupa l'estremo inferiore della finestra, genera la cancellazione di tale frame dal buffer di trasmissione e il conseguente "scorrimento" della finestra di una posizione in avanti, per permettere l'invio di un frame in più. 
